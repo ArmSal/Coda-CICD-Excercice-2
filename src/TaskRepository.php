@@ -39,7 +39,7 @@ final class TaskRepository
         return (int) $this->pdo->lastInsertId();
     }
 
-        public function markDone(int $id): bool
+    public function markDone(int $id): bool
     {
         $stmt = $this->pdo->prepare('UPDATE tasks SET done = 1 WHERE id = :id');
         $stmt->execute(['id' => $id]);
