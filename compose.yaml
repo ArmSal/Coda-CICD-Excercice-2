@@ -1,0 +1,20 @@
+# Environnement de développement local
+name: taches
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: taches        # base créée au premier démarrage
+      MYSQL_USER: app               # utilisateur créé, avec tous les droits sur « taches »
+      MYSQL_PASSWORD: app
+    ports:
+      - "3306:3306"
+    volumes:
+      # tout fichier .sql de ce dossier est exécuté au PREMIER démarrage
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uapp", "-papp"]
+      interval: 5s
+      retries: 20
