@@ -24,6 +24,8 @@ final class TaskValidator
             $errors[] = 'Le titre est obligatoire.';
         } elseif (mb_strlen($title) < 3 || mb_strlen($title) > 100) {
             $errors[] = 'Le titre doit contenir entre 3 et 100 caractères.';
+        } elseif (ctype_digit($title)) {
+            $errors[] = 'Le titre doit contenir des lettres.';
         }
 
         $priority = $data['priority'] ?? 'normale';
