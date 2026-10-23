@@ -29,4 +29,6 @@ try {
 }
 
 http_response_code($status);
-echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+if ($status !== 204) {
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+}
