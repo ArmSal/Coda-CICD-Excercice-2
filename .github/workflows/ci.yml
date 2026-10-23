@@ -73,7 +73,7 @@ jobs:
           name: rapport-unit
           path: rapport-unit.xml
           retention-days: 1
-  
+
   test-integration:
     runs-on: ubuntu-latest
     container: php:8.3-cli
@@ -100,6 +100,7 @@ jobs:
         with:
           name: vendor
           path: vendor/
+      - run: docker-php-ext-install pdo_mysql > /dev/null  # <- Il ny a pas de before_script dans un workflow GitHub Actions.
       - run: php vendor/phpunit/phpunit/phpunit --testsuite Integration --log-junit rapport-integration.xml
       - uses: mikepenz/action-junit-report@3585e9575db828022551b4231f165eb59a0e74e3 # v5.6.2
         if: always()
