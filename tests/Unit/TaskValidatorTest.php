@@ -52,4 +52,10 @@ final class TaskValidatorTest extends TestCase
         $errors = $this->validator->validate(['title' => 'Tâche', 'priority' => 'urgente']);
         $this->assertSame(['La priorité doit être : basse, normale, haute.'], $errors);
     }
+
+    public function testUnTitreFaitUniquementDeChiffresEstRefuse(): void
+    {
+        $errors = $this->validator->validate(['title' => '1234']);
+        $this->assertSame(['Le titre doit contenir des lettres.'], $errors);
+    }
 }
