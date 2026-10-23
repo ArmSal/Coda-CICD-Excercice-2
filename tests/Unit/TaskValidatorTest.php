@@ -29,7 +29,7 @@ final class TaskValidatorTest extends TestCase
 
     public function testLeTitreEstObligatoire(): void
     {
-        $this->assertContains('Le titre est obligatoire.', $this->validator->validate(['title' => '   ']));
+        $this->assertContains('Le titre est requis.', $this->validator->validate(['title' => '   ']));
     }
 
     #[DataProvider('titresInvalides')]
