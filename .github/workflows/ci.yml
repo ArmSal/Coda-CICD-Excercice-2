@@ -73,3 +73,36 @@ jobs:
           name: rapport-unit
           path: rapport-unit.xml
           retention-days: 1
+  
+  test-integration:
+    runs-on: ubuntu-latest
+    container: php:8.3-cli
+    needs: [dependances]
+    permissions:
+      contents: read
+      checks: write
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: taches
+          MYSQL_USER: app
+          MYSQL_PASSWORD: app
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uapp -papp"
+          --health-interval=5s --health-retries=20
+    env:
+      DB_HOST: mysql
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vendor
+          path: vendor/
+      - run: php vendor/phpunit/phpunit/phpunit --testsuite Integration --log-junit rapport-integration.xml
+      - uses: mikepenz/action-junit-report@3585e9575db828022551b4231f165eb59a0e74e3 # v5.6.2
+        if: always()
+        with:
+          report_paths: rapport-integration.xml
+          check_name: Tests intégration
