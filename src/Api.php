@@ -46,6 +46,12 @@ final class Api
                 : [404, ['error' => 'Tâche introuvable']];
         }
 
+        if (preg_match('#^/tasks/(\d+)$#', $path, $m) && $method === 'DELETE') {
+            return $this->tasks->delete((int) $m[1])
+                ? [204, []]
+                : [404, ['error' => 'Tâche introuvable']];
+        }
+
         return [404, ['error' => 'Route inconnue']];
     }
 }

@@ -46,4 +46,11 @@ final class TaskRepository
 
         return $stmt->rowCount() > 0;
     }
+    public function delete(int $id): bool
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM tasks WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->rowCount() > 0;
+    }
 }

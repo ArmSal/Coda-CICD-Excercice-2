@@ -68,4 +68,17 @@ final class TaskRepositoryTest extends TestCase
         $this->assertSame(422, $status);
         $this->assertArrayHasKey('errors', $data);
     }
+
+    public function testSupprimerUneTache(): void
+    {
+        $api = new Api($this->repo, new TaskValidator());
+        $id = $this->repo->create('À supprimer');
+
+        [$status] = $api->handle('DELETE', '/tasks/' . $id);
+        $this->assertSame(204, $status);
+        $this->assertNull($this->repo->find($id));
+
+        [$status] = $api->handle('DELETE', '/tasks/' . $id);
+        $this->assertSame(404, $status);
+    }
 }
