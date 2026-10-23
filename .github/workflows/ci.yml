@@ -1,0 +1,75 @@
+name: CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  # stage : install
+  dependances:
+    runs-on: ubuntu-latest
+    container: composer:2                       # image: composer:2
+    steps:
+      - uses: actions/checkout@v4
+
+      # variables: COMPOSER_CACHE_DIR dans le projet (comme $CI_PROJECT_DIR)
+      - run: echo "COMPOSER_CACHE_DIR=$GITHUB_WORKSPACE/.composer-cache" >> "$GITHUB_ENV"
+
+      # cache: clé = composer.lock, chemin = .composer-cache/
+      - uses: actions/cache@v4
+        with:
+          path: .composer-cache/
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - run: composer validate --strict
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      # artifacts: paths [vendor/], expire_in (1 jour = minimum sur GitHub)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vendor
+          path: vendor/
+          retention-days: 1
+
+  # stage : qualite
+  lint-phpcs:
+    runs-on: ubuntu-latest
+    container: php:8.3-cli                      # image: php:8.3-cli
+    needs: [dependances]                        # needs: [dependances]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vendor
+          path: vendor/
+      # un artifact perd les droits d'exécution : on lance via php
+      - run: php vendor/squizlabs/php_codesniffer/bin/phpcs
+
+  # stage : test
+  test-unitaires:
+    runs-on: ubuntu-latest
+    container: php:8.3-cli
+    needs: [dependances]
+    permissions:
+      contents: read
+      checks: write                             # pour publier le rapport JUnit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vendor
+          path: vendor/
+      - run: php vendor/phpunit/phpunit/phpunit --testsuite Unit --log-junit rapport-unit.xml
+
+      # reports: junit  (if: always() = artifacts: when: always)
+      - uses: mikepenz/action-junit-report@3585e9575db828022551b4231f165eb59a0e74e3 # v5.6.2
+        if: always()
+        with:
+          report_paths: rapport-unit.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rapport-unit
+          path: rapport-unit.xml
+          retention-days: 1
